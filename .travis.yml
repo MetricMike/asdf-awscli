@@ -1,0 +1,11 @@
+language: c
+before_script:
+  - git clone https://github.com/asdf-vm/asdf.git asdf
+  - . asdf/asdf.sh
+script:
+  - asdf plugin-add awscli ./
+  - asdf list-all awscli
+  - asdf plugin-test awscli ./ 'awscli version'
+os:
+  - linux
+  - osx
