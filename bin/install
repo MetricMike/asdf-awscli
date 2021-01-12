@@ -2,22 +2,22 @@
 set -euo pipefail
 
 # required environment variables
-: ${ASDF_INSTALL_PATH?}
-: ${ASDF_DOWNLOAD_PATH?}
+: "${ASDF_INSTALL_PATH?}"
+: "${ASDF_DOWNLOAD_PATH?}"
 
 case "$(uname -s)" in
 	"Darwin")
 		# trying to avoid sudo
-    # sudo installer -pkg ${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg -target /
+    # sudo installer -pkg "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg" -target /
     
     # stolen from https://github.com/asdf-community/asdf-idris/blob/master/bin/install
     # unzip the osx pkg content
-    xar -xf ${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg
+    xar -xf "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg"
     cat Payload | gunzip -dc | cpio -i
-    mv pkg/usr/local/* ${ASDF_INSTALL_PATH}
+    mv pkg/usr/local/* "${ASDF_INSTALL_PATH}"
 		;;
 	"Linux")
     unzip ${ASDF_DOWNLOAD_PATH}/awscliv2.zip
-    ./aws/install --install-dir ${ASDF_INSTALL_PATH} --bin-dir ${ASDF_INSTALL_PATH}/bin
+    ./aws/install --install-dir "${ASDF_INSTALL_PATH}" --bin-dir "${ASDF_INSTALL_PATH}/bin"
     ;;
 esac

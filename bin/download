@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # check ASDF environment variables
-[ -n "$ASDF_INSTALL_VERSION" ] || (echo 'Missing ASDF_INSTALL_VERSION' >&2 && exit 1)
-[ -n "$ASDF_DOWNLOAD_PATH" ] || (echo 'Missing ASDF_DOWNLOAD_PATH' >&2 && exit 1)
+[ -n "${ASDF_INSTALL_VERSION}" ] || (echo 'Missing ASDF_INSTALL_VERSION' >&2 && exit 1)
+[ -n "${ASDF_DOWNLOAD_PATH}" ] || (echo 'Missing ASDF_DOWNLOAD_PATH' >&2 && exit 1)
 
 
 case "$(uname -s)" in
