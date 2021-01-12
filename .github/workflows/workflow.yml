@@ -1,8 +1,6 @@
 name: Main workflow
 
 on: [push, pull_request]
-  paths-ignore:
-      - "**.md"
 
 jobs:
   plugin_test:
