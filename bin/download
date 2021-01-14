@@ -5,16 +5,15 @@ set -euo pipefail
 [ -n "${ASDF_INSTALL_VERSION}" ] || (echo 'Missing ASDF_INSTALL_VERSION' >&2 && exit 1)
 [ -n "${ASDF_DOWNLOAD_PATH}" ] || (echo 'Missing ASDF_DOWNLOAD_PATH' >&2 && exit 1)
 
-
 case "$(uname -s)" in
-    "Darwin")
-        DOWNLOAD_URL="https://awscli.amazonaws.com/AWSCLIV2-${ASDF_INSTALL_VERSION}.pkg"
-        OBJECT_NAME=AWSCLIV2.pkg
-        ;;
-    "Linux")
-        DOWNLOAD_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${ASDF_INSTALL_VERSION}.zip"
-        OBJECT_NAME=awscliv2.zip
-        ;;
+"Darwin")
+	DOWNLOAD_URL="https://awscli.amazonaws.com/AWSCLIV2-${ASDF_INSTALL_VERSION}.pkg"
+	OBJECT_NAME=AWSCLIV2.pkg
+	;;
+"Linux")
+	DOWNLOAD_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${ASDF_INSTALL_VERSION}.zip"
+	OBJECT_NAME=awscliv2.zip
+	;;
 esac
 
 curl -fL -o "${ASDF_DOWNLOAD_PATH}/${OBJECT_NAME}" "${DOWNLOAD_URL}"
