@@ -3,6 +3,7 @@ set -euo pipefail
 
 # required environment variables
 : "${ASDF_INSTALL_PATH?}"
+: "${ASDF_INSTALL_VERSION?}"
 : "${ASDF_DOWNLOAD_PATH?}"
 
 case "$(uname -s)" in
@@ -11,12 +12,22 @@ case "$(uname -s)" in
 	# sudo installer -pkg "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg" -target /
 
 	# unzip the osx pkg content
+	rm -rf ./AWSCLIV2/
 	pkgutil --expand-full "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg" ./AWSCLIV2
-	ls -halt ./AWSCLIV2/aws-cli.pkg/
-	mv AWSCLIV2/aws-cli.pkg/* "${ASDF_INSTALL_PATH}"
+	mv ./AWSCLIV2/aws-cli.pkg/* "${ASDF_INSTALL_PATH}"
 	;;
 "Linux")
-	unzip -q "${ASDF_DOWNLOAD_PATH}/awscliv2.zip"
-	./aws/install --install-dir "${ASDF_INSTALL_PATH}" --bin-dir "${ASDF_INSTALL_PATH}/bin"
-	;;
+    case "${ASDF_INSTALL_VERSION:0:1}" in
+    "1")
+		rm -rf ./awscli-bundle
+        unzip -q "${ASDF_DOWNLOAD_PATH}/awscli-bundle.zip"
+        ./awscli-bundle/install --install-dir "${ASDF_INSTALL_PATH}"
+        ;;
+    "2")
+		rm -rf ./aws
+        unzip -q "${ASDF_DOWNLOAD_PATH}/awscliv2.zip"
+		./aws/install --install-dir "${ASDF_INSTALL_PATH}" --bin-dir "${ASDF_INSTALL_PATH}/bin"
+		;;
+    esac
+    ;;
 esac

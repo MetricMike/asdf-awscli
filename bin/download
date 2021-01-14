@@ -7,13 +7,22 @@ set -euo pipefail
 
 case "$(uname -s)" in
 "Darwin")
-	DOWNLOAD_URL="https://awscli.amazonaws.com/AWSCLIV2-${ASDF_INSTALL_VERSION}.pkg"
-	OBJECT_NAME=AWSCLIV2.pkg
-	;;
+    DOWNLOAD_URL="https://awscli.amazonaws.com/AWSCLIV2-${ASDF_INSTALL_VERSION}.pkg"
+    OBJECT_NAME=AWSCLIV2.pkg
+    ;;
 "Linux")
-	DOWNLOAD_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${ASDF_INSTALL_VERSION}.zip"
-	OBJECT_NAME=awscliv2.zip
-	;;
+    case "${ASDF_INSTALL_VERSION:0:1}" in
+    "1")
+        DOWNLOAD_URL="https://s3.amazonaws.com/aws-cli/awscli-bundle-${ASDF_INSTALL_VERSION}.zip"
+        OBJECT_NAME=awscli-bundle.zip
+        ;;
+    "2")
+        DOWNLOAD_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${ASDF_INSTALL_VERSION}.zip"
+        OBJECT_NAME=awscliv2.zip
+        ;;
+    esac
+    ;;
 esac
 
+rm -f "${ASDF_DOWNLOAD_PATH}/${OBJECT_NAME}"
 curl -fL -o "${ASDF_DOWNLOAD_PATH}/${OBJECT_NAME}" "${DOWNLOAD_URL}"
