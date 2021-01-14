@@ -11,9 +11,9 @@ case "$(uname -s)" in
 	# sudo installer -pkg "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg" -target /
 
 	# unzip the osx pkg content
-	tar xf "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg"
-	tar xf Payload
-	mv pkg/usr/local/* "${ASDF_INSTALL_PATH}"
+	pkgutil --expand-full "${ASDF_DOWNLOAD_PATH}/AWSCLIV2.pkg" .
+	ls -halt .
+	mv AWSCLIV2.pkg/aws-cli/* "${ASDF_INSTALL_PATH}"
 	;;
 "Linux")
 	unzip -q "${ASDF_DOWNLOAD_PATH}/awscliv2.zip"
