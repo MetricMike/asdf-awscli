@@ -5,20 +5,20 @@ releases_path="https://api.github.com/repos/aws/aws-cli/tags?per_page=100"
 cmd="curl -s"
 
 if [ -n "$GITHUB_API_TOKEN" ]; then
-	cmd="${cmd} -H 'Authorization: token ${GITHUB_API_TOKEN}'"
+    cmd="${cmd} -H 'Authorization: token ${GITHUB_API_TOKEN}'"
 elif [ -n "$OAUTH_TOKEN" ]; then
-	cmd="${cmd} -H 'Authorization: token ${OAUTH_TOKEN}'"
+    cmd="${cmd} -H 'Authorization: token ${OAUTH_TOKEN}'"
 fi
 
 cmd="${cmd} ${releases_path}"
 
 # stolen from https://github.com/rbenv/ruby-build/pull/631/files#diff-fdcfb8a18714b33b07529b7d02b54f1dR942
 function sort_versions() {
-	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
-		grep ^2 |
-		LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
+    sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
+        grep ^2 |
+        LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
 # Fetch all tag names. Then remove all unnecesary characters (name and '": ,').
-versions=$(eval "${cmd}" | grep "name" | sed 's/name//g;s/"//g;s/://g;s/ //g;s/,//g' | sort_versions)
+versions=$(eval "${cmd}" | tac | grep "name" | awk '{print $2}' | sed 's/"//g;s/,//g' | tr '\n' ' ') # | sort_versions)
 echo "${versions}"

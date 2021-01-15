@@ -25,4 +25,4 @@ case "$(uname -s)" in
 esac
 
 rm -f "${ASDF_DOWNLOAD_PATH}/${OBJECT_NAME}"
-curl -fL -o "${ASDF_DOWNLOAD_PATH}/${OBJECT_NAME}" "${DOWNLOAD_URL}"
+curl -sfL -o "${ASDF_DOWNLOAD_PATH}/${OBJECT_NAME}" "${DOWNLOAD_URL}"
