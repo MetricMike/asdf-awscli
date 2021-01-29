@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+maj_min_v="$(python -c 'import platform; print(platform.python_version()[:3])')"
+echo "build/scripts-${maj_min_v}"
