@@ -17,7 +17,7 @@
 # Dependencies
 
 - `bash`, `curl`, `tar`: generic POSIX utilities.
-- `Python 3.6+`: This plugin installs awscli from source into a virtualenv. A currently maintained version of Python is required to do this. 
+- `Python 3.6.4+`: This plugin installs awscli from source into a virtualenv. A currently maintained version of Python is required to do this. 
 
 # Install
 
