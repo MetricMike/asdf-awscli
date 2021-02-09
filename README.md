@@ -17,7 +17,7 @@
 # Dependencies
 
 - `bash`, `curl`, `tar`: generic POSIX utilities.
-- `SOME_ENV_VAR`: set this environment variable in your shell config to load the correct version of tool x.
+- `Python 3.7+`: This plugin installs awscli from source into a virtualenv. A currently maintained version of Python is required to do this. 
 
 # Install
 
@@ -36,7 +36,9 @@ awscli:
 asdf list-all awscli
 
 # Install specific version
-asdf install awscli latest
+asdf install awscli latest   # 2.1.24
+asdf install awscli latest 2 # 2.1.24
+asdf install awscli latest 1 # 1.19.4
 
 # Set a version globally (on your ~/.tool-versions file)
 asdf global awscli latest
