@@ -58,8 +58,9 @@ install_version() {
 
     #extract to install_version and rename this block download_version?
     pushd "${install_path}"
-    MAJ_MIN_V="$(python -c 'import platform; print(platform.python_version()[:3])')"
-    python setup.py build --prefix "${install_path}"   
+    pip uninstall aws
+    pip install -r requirements.txt
+    pip install -e .
     popd
 
     rm "${release_file}"
