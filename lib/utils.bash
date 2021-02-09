@@ -58,16 +58,18 @@ install_version() {
 
     #extract to install_version and rename this block download_version?
     pushd "${install_path}"
-    pip uninstall aws
+    python -m venv ./venv
+    source ./venv/bin/activate
+    pip install -U pip setuptools wheel
     pip install -r requirements.txt
     pip install -e .
+    deactivate
     popd
 
     rm "${release_file}"
 
-    # TODO: Asert awscli executable exists.
     local tool_cmd
-    tool_cmd="$(echo "awscli --help" | cut -d' ' -f1)"
+    tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
     test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
 
     echo "awscli ${version} installation was successful!"
