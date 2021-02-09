@@ -9,10 +9,10 @@ fail() {
   exit 1
 }
 
-curl_opts=(-fsSL)
+CURL_OPTS=(-fsSL)
 
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-  curl_opts=("${curl_opts[@]}" -H "Authorization: token ${GITHUB_API_TOKEN}")
+  CURL_OPTS=("${CURL_OPTS[@]}" -H "Authorization: token ${GITHUB_API_TOKEN}")
 fi
 
 sort_versions() {
@@ -31,14 +31,14 @@ list_all_versions() {
 }
 
 download_release() {
-  local version filename os url
+  local version filename url
   version="$1"
   filename="$2"
 
   url="${GH_REPO}/archive/${version}.tar.gz"
 
   echo "* Downloading awscli release ${version}..."
-  curl "${curl_opts[@]}" -o "${filename}" -C - "${url}" || fail "Could not download ${url}"
+  curl "${CURL_OPTS[@]}" -o "${filename}" -C - "${url}" || fail "Could not download ${url}"
 }
 
 install_version() {
@@ -54,11 +54,12 @@ install_version() {
   (
     mkdir -p "${install_path}"
     download_release "${version}" "${release_file}"
-    tar -xzf "${release_file}" -C "${install_path}" --strip-components=1 || fail "Could not extract $release_file"
+    tar -xzf "${release_file}" -C "${install_path}" --strip-components=1 || fail "Could not extract ${release_file}"
 
     #extract to install_version and rename this block download_version?
     pushd "${install_path}"
-    python setup.py build
+    MAJ_MIN_V="$(python -c 'import platform; print(platform.python_version()[:3])')"
+    python setup.py build --prefix "${install_path}"   
     popd
 
     rm "${release_file}"
