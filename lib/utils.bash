@@ -44,37 +44,64 @@ download_release() {
 install_version() {
   local install_type="$1"
   local version="$2"
+  local major_version="${version:0:1}"
   local install_path="$3"
+  local os_distribution="$(uname -s)"
 
   if [ "${install_type}" != "version" ]; then
     fail "asdf-awscli supports release installs only"
   fi
 
-  local release_file="${install_path}/awscli-${version}.tar.gz"
-  (
-    mkdir -p "${install_path}"
-    download_release "${version}" "${release_file}"
-    tar -xzf "${release_file}" -C "${install_path}" --strip-components=1 || fail "Could not extract ${release_file}"
+  if [[ "${os_distribution}" -eq "Darwin" && "${major_version}" -eq "2" ]]; then
+    (
+      local release_file="${install_path}/awscli-${version}.pkg"
+      local url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
 
-    #extract to install_version and rename this block download_version?
-    pushd "${install_path}"
-    python -m venv ./venv
-    source ./venv/bin/activate
-    pip install -U pip setuptools wheel
-    pip install -r requirements.txt
-    pip install -e .
-    deactivate
-    popd
+      mkdir -p "${install_path}"
+      curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
+      xar -xf "${release_file}" -C "${install_path}" || fail "Could not extract ${release_file}"
+      pushd "${install_path}"
+        gunzip -dc aws-cli.pkg/Payload | cpio -i
+      popd
 
-    rm "${release_file}"
+      rm "${release_file}"
 
-    local tool_cmd
-    tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
-    test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
+      local tool_cmd
+      tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
+      test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
 
-    echo "awscli ${version} installation was successful!"
-  ) || (
-    rm -rf "${install_path}"
-    fail "An error ocurred while installing awscli ${version}."
-  )
+      echo "awscli ${version} installation was successful!"
+    ) || (
+      rm -rf "${install_path}"
+      fail "An error ocurred while installing awscli ${version}."
+    )
+  else
+    local release_file="${install_path}/awscli-${version}.tar.gz"
+    (
+      mkdir -p "${install_path}"
+      download_release "${version}" "${release_file}"
+      tar -xzf "${release_file}" -C "${install_path}" --strip-components=1 || fail "Could not extract ${release_file}"
+
+      #extract to install_version and rename this block download_version?
+      pushd "${install_path}"
+      python -m venv ./venv
+      source ./venv/bin/activate
+      pip install -U pip setuptools wheel
+      pip install -r requirements.txt
+      pip install -e .
+      deactivate
+      popd
+
+      rm "${release_file}"
+
+      local tool_cmd
+      tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
+      test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
+
+      echo "awscli ${version} installation was successful!"
+    ) || (
+      rm -rf "${install_path}"
+      fail "An error ocurred while installing awscli ${version}."
+    )
+  fi
 }
