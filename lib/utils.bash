@@ -59,9 +59,10 @@ install_version() {
 
       mkdir -p "${install_path}"
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
-      xar -xf "${release_file}" -C "${install_path}" || fail "Could not extract ${release_file}"
+      
       pushd "${install_path}"
-        gunzip -dc aws-cli.pkg/Payload | cpio -i
+      pkgutil --expand-full "${release_file}" . || fail "Could not extract ${release_file}"
+      ls .
       popd
 
       rm "${release_file}"
