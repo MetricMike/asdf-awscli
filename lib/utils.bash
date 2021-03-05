@@ -52,7 +52,7 @@ install_version() {
     fail "asdf-awscli supports release installs only"
   fi
 
-  if [[ "${os_distribution}" -eq "Darwin" && "${major_version}" -eq "2" ]]; then
+  if [[ "${os_distribution}" == "Darwin" && "${major_version}" == "2" ]]; then
     (
       local release_file="${install_path}/awscli-${version}.pkg"
       local url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
