@@ -59,17 +59,44 @@ install_version() {
 
       mkdir -p "${install_path}"
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
-      
-      pushd "${install_path}"
-      pkgutil --expand-full "${release_file}" . || fail "Could not extract ${release_file}"
+
+      echo ""
+      echo "extracting ${release_file} to ./AWSCLIV2 ..."
+      echo "" 
+      pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
+      echo ""
+      echo "extracting complete"
+      echo ""
+
+      echo ""
+      echo "contents of ./AWSCLIV2 are..."
+      echo ""
+      ls ./AWSCLIV2
+
+      echo ""
+      echo "attempting to mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli/* to ${install_path}     ..."
+      echo ""
+      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli/* "${install_path}"
+      echo ""
+      echo "move complete"
+      echo ""
+
+      echo ""
+      echo "install_path contents are ..."
+      echo ""
+      ls "${install_path}/"
+
+      echo ""
+      echo "cwd is..."
+      echo ""
       ls .
-      popd
+      ls ./AWSCLIV2
 
       rm "${release_file}"
 
       local tool_cmd
       tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
-      test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
+      test -x "${install_path}/${tool_cmd}" || fail "Expected ${install_path}/${tool_cmd} to be executable."
 
       echo "awscli ${version} installation was successful!"
     ) || (
