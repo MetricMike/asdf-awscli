@@ -20,6 +20,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python-version: ['3.7', '3.8', '3.9']
+        cli-version: ['latest:1', 'latest:2']
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set up Python
@@ -30,3 +31,4 @@ jobs:
         uses: asdf-vm/actions/plugin-test@v1
         with:
           command: aws --version
+          version: ${{ matrix.cli-version }}
