@@ -48,7 +48,7 @@ install_version() {
   local install_path="$3"
   local os_distribution="$(uname -s)"
   local tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
-  local test_path="${install_path}/${tool_cmd}"
+  local test_path="${install_path}/bin/${tool_cmd}"
 
   if [ "${install_type}" != "version" ]; then
     fail "asdf-awscli supports release installs only"
@@ -64,8 +64,8 @@ install_version() {
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
 
       pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
-      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli/* "${install_path}"
-      rm "${release_file}"
+      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli* "${install_path}/bin"
+      rm -rf "${release_file}" ./AWSCLIV2
 
       test -x "${test_path}" || fail "Expected ${test_path} to be executable."
     ) || (
@@ -90,7 +90,6 @@ install_version() {
 
       rm "${release_file}"
 
-      test_path="${install_path}/bin/${tool_cmd}"
       test -x "${test_path}" || fail "Expected ${test_path} to be executable."
     ) || (
       rm -rf "${install_path}"
