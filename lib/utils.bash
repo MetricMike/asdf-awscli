@@ -64,7 +64,10 @@ install_version() {
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
 
       pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
-      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli* "${install_path}/bin"
+      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli "${install_path}"
+      mkdir "${install_path}/bin"
+      ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
+      ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
       rm -rf "${release_file}" ./AWSCLIV2
 
       test -x "${test_path}" || fail "Expected ${test_path} to be executable."
