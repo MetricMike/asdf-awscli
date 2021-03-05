@@ -47,58 +47,27 @@ install_version() {
   local major_version="${version:0:1}"
   local install_path="$3"
   local os_distribution="$(uname -s)"
+  local tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
+  local test_path="${install_path}/${tool_cmd}"
 
   if [ "${install_type}" != "version" ]; then
     fail "asdf-awscli supports release installs only"
   fi
+
+  mkdir -p "${install_path}"
 
   if [[ "${os_distribution}" == "Darwin" && "${major_version}" == "2" ]]; then
     (
       local release_file="${install_path}/awscli-${version}.pkg"
       local url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
 
-      mkdir -p "${install_path}"
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
 
-      echo ""
-      echo "extracting ${release_file} to ./AWSCLIV2 ..."
-      echo "" 
       pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
-      echo ""
-      echo "extracting complete"
-      echo ""
-
-      echo ""
-      echo "contents of ./AWSCLIV2 are..."
-      echo ""
-      ls ./AWSCLIV2
-
-      echo ""
-      echo "attempting to mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli/* to ${install_path}     ..."
-      echo ""
       mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli/* "${install_path}"
-      echo ""
-      echo "move complete"
-      echo ""
-
-      echo ""
-      echo "install_path contents are ..."
-      echo ""
-      ls "${install_path}/"
-
-      echo ""
-      echo "cwd is..."
-      echo ""
-      ls .
-      ls ./AWSCLIV2
-
       rm "${release_file}"
 
-      local tool_cmd
-      tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
-      test -x "${install_path}/${tool_cmd}" || fail "Expected ${install_path}/${tool_cmd} to be executable."
-
-      echo "awscli ${version} installation was successful!"
+      test -x "${test_path}" || fail "Expected ${test_path} to be executable."
     ) || (
       rm -rf "${install_path}"
       fail "An error ocurred while installing awscli ${version}."
@@ -106,7 +75,6 @@ install_version() {
   else
     local release_file="${install_path}/awscli-${version}.tar.gz"
     (
-      mkdir -p "${install_path}"
       download_release "${version}" "${release_file}"
       tar -xzf "${release_file}" -C "${install_path}" --strip-components=1 || fail "Could not extract ${release_file}"
 
@@ -122,14 +90,13 @@ install_version() {
 
       rm "${release_file}"
 
-      local tool_cmd
-      tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
-      test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
-
-      echo "awscli ${version} installation was successful!"
+      test_path="${install_path}/bin/${tool_cmd}"
+      test -x "${test_path}" || fail "Expected ${test_path} to be executable."
     ) || (
       rm -rf "${install_path}"
       fail "An error ocurred while installing awscli ${version}."
     )
   fi
+
+  echo "awscli ${version} installation was successful!"
 }
