@@ -2,11 +2,11 @@
 
 set -euo pipefail
 
-local major_version="${ASDF_INSTALL_VERSION:0:1}"
-local os_distribution="$(uname -s)"
+MAJOR_VERSION="${ASDF_INSTALL_VERSION:0:1}"
+OS_DISTRIBUTION="$(uname -s)"
 
-if [[ "${os_distribution}" == "Darwin" && "${major_version}" == "2" ]]; then
-    echo "aws-cli"
+if [[ "${OS_DISTRIBUTION}" == "Darwin" && "${MAJOR_VERSION}" == "2" ]]; then
+  echo "aws-cli"
 else
-    echo "venv/bin"
+  echo "venv/bin"
 fi
