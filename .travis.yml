@@ -5,7 +5,7 @@ before_script:
 script:
   - asdf plugin-add awscli ./
   - asdf list-all awscli
-  - asdf plugin-test awscli ./ 'awscli version'
+  - asdf plugin-test awscli ./ 'aws version'
 os:
   - linux
   - osx
