@@ -16,8 +16,10 @@
 
 # Dependencies
 
-- `bash`, `curl`, `tar`: generic POSIX utilities.
-- `Python 3.7.5+`: This plugin installs awscli from source into a virtualenv. A currently maintained version of Python is required to do this. 
+- `bash`, `curl`, `tar`: generic POSIX utilities. These should be installed by default on most operating systems.
+
+- v1 - Linux/MacOS/Windows || v2 - Linux/Windows
+  - `Python 3.7.5+`: This plugin installs awscli from source into a virtualenv on these OS distributions. A currently maintained version of Python is required to do this.
 
 # Install
 
