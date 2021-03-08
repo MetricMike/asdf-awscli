@@ -44,7 +44,7 @@ asdf install awscli latest 1 # 1.19.4
 asdf global awscli latest
 
 # Now awscli commands are available
-awscli --help
+aws --help
 ```
 
 Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
