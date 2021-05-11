@@ -5,7 +5,7 @@ set -euo pipefail
 MAJOR_VERSION="${ASDF_INSTALL_VERSION:0:1}"
 OS_DISTRIBUTION="$(uname -s)"
 
-if [[ "${OS_DISTRIBUTION}" == "Darwin" && "${MAJOR_VERSION}" == "2" ]]; then
+if [[ ("${OS_DISTRIBUTION}" == "Darwin" || "${OS_DISTRIBUTION}" == "Linux") && "${MAJOR_VERSION}" == "2" ]]; then
   echo "bin"
 else
   echo "venv/bin"

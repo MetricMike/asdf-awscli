@@ -75,6 +75,23 @@ install_version() {
       rm -rf "${install_path}"
       fail "An error ocurred while installing awscli ${version}."
     )
+  elif [[ "${os_distribution}" == "Linux" && "${major_version}" == "2" ]]; then
+    (
+      local release_file="${install_path}/awscli-${version}.zip"
+      local url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${version}.zip"
+
+      curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
+
+      unzip -q ${release_file} -d ./AWSCLIV2 || fail "Could not extract ${release_file}"
+      mkdir "${install_path}/bin"
+      ./AWSCLIV2/aws/install -i "${install_path}" -b "${install_path}/bin"
+      rm -rf "${release_file}" ./AWSCLIV2
+
+      test -x "${test_path}" || fail "Expected ${test_path} to be executable."
+    ) || (
+      rm -rf "${install_path}"
+      fail "An error ocurred while installing awscli ${version}."
+    )
   else
     local release_file="${install_path}/awscli-${version}.tar.gz"
     (
