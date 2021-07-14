@@ -47,6 +47,7 @@ install_version() {
   local major_version="${version:0:1}"
   local install_path="$3"
   local os_distribution="$(uname -s)"
+  local arch="$(uname -m)"
   local tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
   local test_path="${install_path}/bin/${tool_cmd}"
 
@@ -78,7 +79,7 @@ install_version() {
   elif [[ "${os_distribution}" == "Linux" && "${major_version}" == "2" ]]; then
     (
       local release_file="${install_path}/awscli-${version}.zip"
-      local url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${version}.zip"
+      local url="https://awscli.amazonaws.com/awscli-exe-linux-${arch}-${version}.zip"
 
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
 
