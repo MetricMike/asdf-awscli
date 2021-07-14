@@ -30,6 +30,7 @@ list_all_versions() {
   list_github_tags
 }
 
+
 download_release() {
   local version filename url
   version="$1"
@@ -47,11 +48,16 @@ install_version() {
   local major_version="${version:0:1}"
   local install_path="$3"
   local os_distribution="$(uname -s)"
+  local os_arch="$(uname -m)"
   local tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
   local test_path="${install_path}/bin/${tool_cmd}"
 
   if [ "${install_type}" != "version" ]; then
     fail "asdf-awscli supports release installs only"
+  fi
+
+  if [[ "$os_arch" != "x86_64" && "$os_arch" != "aarch64" ]]; then
+    fail "asdf-awscli only supports x86_64 and aarch64 system architectures"
   fi
 
   mkdir -p "${install_path}"
@@ -78,7 +84,7 @@ install_version() {
   elif [[ "${os_distribution}" == "Linux" && "${major_version}" == "2" ]]; then
     (
       local release_file="${install_path}/awscli-${version}.zip"
-      local url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${version}.zip"
+      local url="https://awscli.amazonaws.com/awscli-exe-linux-${os_arch}-${version}.zip"
 
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
 
