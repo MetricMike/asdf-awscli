@@ -30,7 +30,6 @@ list_all_versions() {
   list_github_tags
 }
 
-
 download_release() {
   local version filename url
   version="$1"
