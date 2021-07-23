@@ -38,8 +38,8 @@ asdf list-all awscli
 
 # Install specific version
 asdf install awscli latest   # 2.1.24
-asdf install awscli latest 2 # 2.1.24
-asdf install awscli latest 1 # 1.19.4
+asdf install awscli latest:2 # 2.1.24
+asdf install awscli latest:1 # 1.19.4
 
 # Set a version globally (on your ~/.tool-versions file)
 asdf global awscli latest
