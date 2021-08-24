@@ -55,8 +55,8 @@ install_version() {
     fail "asdf-awscli supports release installs only"
   fi
 
-  if [[ "$os_arch" != "x86_64" && "$os_arch" != "aarch64" ]]; then
-    fail "asdf-awscli only supports x86_64 and aarch64 system architectures"
+  if [[ "$os_arch" != "x86_64" && "$os_arch" != "aarch64" && "$os_arch" != "arm64" ]]; then
+    fail "asdf-awscli only supports x86_64, arm64, and aarch64 system architectures"
   fi
 
   mkdir -p "${install_path}"
