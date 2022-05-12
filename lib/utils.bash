@@ -67,13 +67,33 @@ install_version() {
       local url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
 
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
-
-      pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
-      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli "${install_path}"
+      if [[ "${os_arch}" == "arm64" ]]; then
+          read -rd '' choices << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <array>
+    <dict>
+      <key>choiceAttribute</key>
+      <string>customLocation</string>
+      <key>attributeSetting</key>
+      <string>${install_path}</string>
+      <key>choiceIdentifier</key>
+      <string>default</string>
+    </dict>
+  </array>
+</plist>
+EOF
+          echo "$choices" > ${install_path}/choices.xml
+          installer -pkg $release_file -target CurrentUserHomeDirectory -applyChoiceChangesXML ${install_path}/choices.xml || fail "Could not extract ${release_file}"
+      else
+          pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
+          mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli "${install_path}"
+      fi
       mkdir "${install_path}/bin"
       ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
       ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
-      rm -rf "${release_file}" ./AWSCLIV2
+      rm -rf "${release_file}" ./AWSCLIV2 "${install_path}"/choices.xml
 
       test -x "${test_path}" || fail "Expected ${test_path} to be executable."
     ) || (
