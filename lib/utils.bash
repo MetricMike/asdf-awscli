@@ -68,6 +68,7 @@ install_version() {
 
       curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
 
+      rm -rf ./AWSCLIV2
       pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
       mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli "${install_path}"
       mkdir "${install_path}/bin"
