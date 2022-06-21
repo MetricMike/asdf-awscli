@@ -5,7 +5,7 @@ Fork this repository, and make your changes in your fork. Once the code has been
 Testing Locally:
 
 - Code should pass shellcheck (on linux)
-- Code should pass shfmt (on mac)
+- Code should pass shfmt
 - Fork should install and run help with `asdf plugin` test
 
 ```shell
@@ -19,6 +19,7 @@ asdf install shfmt latest
 asdf global shfmt latest
 
 # Run both linters from fork root (no output means linters passed)
+# These matches the lint GitHub Action
 shellcheck -x bin/* -P lib/
 shfmt -d -i 2 -ci .
 

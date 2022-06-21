@@ -87,6 +87,7 @@ EOF
           echo "$choices" > ${install_path}/choices.xml
           installer -pkg $release_file -target CurrentUserHomeDirectory -applyChoiceChangesXML ${install_path}/choices.xml || fail "Could not extract ${release_file}"
       else
+          rm -rf ./AWSCLIV2
           pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
           mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli "${install_path}"
       fi
