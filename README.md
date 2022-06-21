@@ -15,10 +15,11 @@
 
 # Dependencies
 
-- `bash`, `curl`, `tar`, `unzip`: generic POSIX utilities. These should be installed by default on most operating systems.
+- `curl`, `git`: Required by [asdf](https://asdf-vm.com/guide/getting-started.html#_1-install-dependencies)
+- `bash`, `tar`, `unzip`: generic POSIX utilities. These should be installed by default on most operating systems.
 
 - v1 - Linux/MacOS/Windows || v2 - Windows
-  - `Python 3.7.5+`: This plugin installs awscli from source into a virtualenv on these OS distributions. A currently maintained version of Python is required to do this.
+  - `Python 3+ w/ current support (3.7.13+ as of 20JUN2022)`: For v1 (and v2 on Windows until https://github.com/MetricMike/asdf-awscli/issues/2 is resolved), this plugin installs awscli from source into a virtualenv on these OS distributions utilizing pip. In theory, most Python 3s will be sufficient, but issues will be closed if the Python is not listed as green on https://endoflife.date/python.
 
 # Install
 
@@ -34,7 +35,7 @@ awscli:
 
 ```shell
 # Show all installable versions
-asdf list-all awscli
+asdf list all awscli
 
 # Install specific version
 asdf install awscli latest   # 2.1.24
