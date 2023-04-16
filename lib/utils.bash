@@ -128,7 +128,7 @@ install_v1_bundled_installer() {
 	download_path="$1"
 	install_path="$2"
 	# requires curl, unzip, and python 3.7+ https://docs.aws.amazon.com/cli/v1/userguide/cli-chap-install.html#cli-chap-install-python
-	"${download_path}"/awscli-bundle/install --install-dir "${install_path}" --bin-dir "${install_path}"/bin
+	"${download_path}"/awscli-bundle/install --install-dir "${install_path}" --bin-location "${install_path}/bin"
 }
 
 install_v2_linux_bundled_installer() {
@@ -137,7 +137,7 @@ install_v2_linux_bundled_installer() {
 	install_path="$2"
 	# requires curl, unzip
 	# requires glibc, groff, less
-	"${download_path}"/aws/install --install-dir "${install_path}" --bin-dir "${install_path}"/bin
+	"${download_path}"/aws/install --install-dir "${install_path}" --bin-dir "${install_path}/bin"
 }
 
 install_v2_macos_bundled_installer() {
