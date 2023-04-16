@@ -24,4 +24,4 @@ if [ -z "${ASDF_DOWNLOAD_PATH:-}" ]; then
 	bash "$(dirname "$0")/download"
 fi
 
-install_release "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}" "${ASDF_DOWNLOAD_PATH}"
+install_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}" "${ASDF_INSTALL_PATH}"
