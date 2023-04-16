@@ -3,125 +3,178 @@
 set -euo pipefail
 
 GH_REPO="https://github.com/aws/aws-cli"
+TOOL_NAME="awscli"
+TOOL_TEST="aws --version"
 
 fail() {
-  echo -e "asdf-awscli: $*"
-  exit 1
+	echo -e "asdf-awscli: $*"
+	exit 1
 }
 
 CURL_OPTS=(-fsSL)
 
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-  CURL_OPTS=("${CURL_OPTS[@]}" -H "Authorization: token ${GITHUB_API_TOKEN}")
-fi
-
 sort_versions() {
-  sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
-    LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
+	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
+		LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
 list_github_tags() {
-  git ls-remote --tags --refs "${GH_REPO}" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//'
+	git ls-remote --tags --refs "${GH_REPO}" |
+		grep -o 'refs/tags/.*' | cut -d/ -f3- |
+		sed 's/^v//'
 }
 
 list_all_versions() {
-  list_github_tags
+	list_github_tags
+}
+
+# TODO: Make this actually use the source distribution
+# https://docs.aws.amazon.com/cli/latest/userguide/getting-started-source-install.html
+download_source() {
+	local version filename url
+	version="$1"
+	filename="$2"
+
+	url="${GH_REPO}/archive/${version}.tar.gz"
+
+	echo "* Downloading awscli release ${version}..."
+	curl "${CURL_OPTS[@]}" -o "${filename}" -C - "${url}" || fail "Could not download ${url}"
 }
 
 download_release() {
-  local version filename url
-  version="$1"
-  filename="$2"
+	local version install_path download_path major_version os_distribution os_arch
+	version="$1"
+	install_path="$2"
+	download_path="$3"
+	major_version="${version:0:1}"
 
-  url="${GH_REPO}/archive/${version}.tar.gz"
+	if [[ "${major_version}" == "1" ]]; then
+		release_url="https://s3.amazonaws.com/aws-cli/awscli-bundle-${version}.zip"
+		filename="awscli-bundle.zip"
+	elif [[ "${major_version}" == "2" ]]; then
+		os_distribution="$(uname -s)"
+		os_arch="$(uname -m)"
 
-  echo "* Downloading awscli release ${version}..."
-  curl "${CURL_OPTS[@]}" -o "${filename}" -C - "${url}" || fail "Could not download ${url}"
+		if [[ "${os_distribution}" == "Linux" ]]; then
+			if [[ "${os_arch}" == "x86_64" || "${os_arch}" == "aarch64" ]]; then
+				release_url="https://awscli.amazonaws.com/awscli-exe-linux-${os_arch}-${version}.zip"
+				filename="awscliv2.zip"
+			else
+				fail "asdf-${TOOL_NAME} does not support ${os_arch} on ${os_distribution}"
+			fi
+		elif [[ "${os_distribution}" == "Darwin" ]]; then
+			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
+			filename="AWSCLIV2.pkg"
+		elif [[ "${os_distribution}" == "Windows_NT" ]]; then
+			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.msi"
+			filename="AWSCLIV2.msi"
+		else
+			fail "asdf-${TOOL_NAME} does not support OS distribution ${os_distribution}"
+		fi
+	else
+		fail "asdf-${TOOL_NAME} does not support major version v${version}"
+	fi
+
+	release_file="${download_path}/${filename}"
+	curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${release_url}" || fail "Could not download ${release_url}"
+	if [[ "${release_file: -3}" == "zip" ]]; then
+		unzip "${release_file}" -d "${download_path}"
+		rm "${release_file}"
+	fi
 }
 
-install_version() {
-  local install_type="$1"
-  local version="$2"
-  local major_version="${version:0:1}"
-  local install_path="$3"
-  local os_distribution="$(uname -s)"
-  local os_arch="$(uname -m)"
-  local tool_cmd="$(echo "aws --help" | cut -d' ' -f1)"
-  local test_path="${install_path}/bin/${tool_cmd}"
+install_release() {
+	local version download_path install_path major_version os_distribution os_arch
+	version="$1"
+	download_path="$2"
+	install_path="$3"
+	major_version="${version:0:1}"
 
-  if [ "${install_type}" != "version" ]; then
-    fail "asdf-awscli supports release installs only"
-  fi
+	(
+		if [[ "${major_version}" == "1" ]]; then
+			install_v1_bundled_installer "${download_path}" "${install_path}"
+		elif [[ "${major_version}" == "2" ]]; then
+			os_distribution="$(uname -s)"
+			os_arch="$(uname -m)"
 
-  if [[ "$os_arch" != "x86_64" && "$os_arch" != "aarch64" && "$os_arch" != "arm64" ]]; then
-    fail "asdf-awscli only supports x86_64, arm64, and aarch64 system architectures"
-  fi
+			if [[ "${os_distribution}" == "Linux" ]]; then
+				if [[ "${os_arch}" == "x86_64" || "${os_arch}" == "aarch64" ]]; then
+					install_v2_linux_bundled_installer "${download_path}" "${install_path}"
+				else
+					fail "asdf-${TOOL_NAME} does not support ${os_arch} on ${os_distribution}"
+				fi
+			elif [[ "${os_distribution}" == "Darwin" ]]; then
+				install_v2_macos_bundled_installer "${download_path}" "${install_path}"
+			elif [[ "${os_distribution}" == "Windows_NT" ]]; then
+				install_v2_windows_bundled_installer "${download_path}" "${install_path}"
+			else
+				fail "asdf-${TOOL_NAME} does not support OS distribution ${os_distribution}"
+			fi
+		else
+			fail "asdf-${TOOL_NAME} does not support major version v${major_version}"
+		fi
 
-  mkdir -p "${install_path}"
+		local tool_cmd
+		tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
+		test -x "${install_path}/${tool_cmd}" || fail "Expected ${install_path}/aws to be executable."
+		echo "asdf-${TOOL_NAME} ${version} installation was successful!"
+	) || (
+		rm -rf "${install_path}"
+		fail "An error ocurred while installing awscli ${version}."
+	)
+}
 
-  if [[ "${os_distribution}" == "Darwin" && "${major_version}" == "2" ]]; then
-    (
-      local release_file="${install_path}/awscli-${version}.pkg"
-      local url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
+install_v1_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
+	# requires curl, unzip, and python 3.7+ https://docs.aws.amazon.com/cli/v1/userguide/cli-chap-install.html#cli-chap-install-python
+	"${download_path}"/awscli-bundle/install --install-dir "${install_path}" --bin-dir "${install_path}"/bin
+}
 
-      curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
+install_v2_linux_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
+	# requires curl, unzip
+	# requires glibc, groff, less
+	"${download_path}"/aws/install --install-dir "${install_path}" --bin-dir "${install_path}"/bin
+}
 
-      rm -rf ./AWSCLIV2
-      pkgutil --expand-full "${release_file}" ./AWSCLIV2 || fail "Could not extract ${release_file}"
-      mv ./AWSCLIV2/aws-cli.pkg/Payload/aws-cli "${install_path}"
-      mkdir "${install_path}/bin"
-      ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
-      ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
-      rm -rf "${release_file}" ./AWSCLIV2
+install_v2_macos_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
 
-      test -x "${test_path}" || fail "Expected ${test_path} to be executable."
-    ) || (
-      rm -rf "${install_path}"
-      fail "An error ocurred while installing awscli ${version}."
-    )
-  elif [[ "${os_distribution}" == "Linux" && "${major_version}" == "2" ]]; then
-    (
-      local release_file="${install_path}/awscli-${version}.zip"
-      local url="https://awscli.amazonaws.com/awscli-exe-linux-${os_arch}-${version}.zip"
+	# requires curl
+	cat <<EOF >"${download_path}/choices.xml"
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+    <array>
+      <dict>
+        <key>choiceAttribute</key>
+        <string>customLocation</string>
+        <key>attributeSetting</key>
+        <string>${install_path}</string>
+        <key>choiceIdentifier</key>
+        <string>default</string>
+      </dict>
+    </array>
+  </plist>
+EOF
+	installer -pkg "${download_path}/AWSCLIV2.pkg" -target CurrentUserHomeDirectory -applyChoiceChangesXML "${download_path}/choices.xml"
+	mkdir "${install_path}/bin"
+	ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
+	ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
+	rm -rf "${download_path}/choices.xml"
+}
 
-      curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${url}" || fail "Could not download ${url}"
+install_v2_windows_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
 
-      unzip -q ${release_file} -d ./AWSCLIV2 || fail "Could not extract ${release_file}"
-      mkdir "${install_path}/bin"
-      ./AWSCLIV2/aws/install -i "${install_path}" -b "${install_path}/bin"
-      rm -rf "${release_file}" ./AWSCLIV2
-
-      test -x "${test_path}" || fail "Expected ${test_path} to be executable."
-    ) || (
-      rm -rf "${install_path}"
-      fail "An error ocurred while installing awscli ${version}."
-    )
-  else
-    local release_file="${install_path}/awscli-${version}.tar.gz"
-    (
-      download_release "${version}" "${release_file}"
-      tar -xzf "${release_file}" -C "${install_path}" --strip-components=1 || fail "Could not extract ${release_file}"
-
-      #extract to install_version and rename this block download_version?
-      pushd "${install_path}"
-      python -m venv ./venv
-      source ./venv/bin/activate
-      pip install -U pip setuptools wheel
-      pip install -r requirements.txt
-      pip install -e .
-      deactivate
-      popd
-
-      rm "${release_file}"
-
-      test -x "${test_path}" || fail "Expected ${test_path} to be executable."
-    ) || (
-      rm -rf "${install_path}"
-      fail "An error ocurred while installing awscli ${version}."
-    )
-  fi
-
-  echo "awscli ${version} installation was successful!"
+	# requires curl, msiexec
+	msiexec.exe /i "${download_path}/AWSCLIV2.msi" "INSTALLDIR=${ASDF_INSTALL_PATH}" MSIINSTALLPERUSER=1
 }

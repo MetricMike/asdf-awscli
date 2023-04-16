@@ -1,8 +1,7 @@
 name: Lint
+
 on:
   pull_request:
-    branches:
-      - main
     paths-ignore:
       - "**.md"
   push:
@@ -14,31 +13,18 @@ on:
     - cron: "0 0 * * *" # daily at midnight
 
 jobs:
-  shellcheck:
-    name: shellcheck
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Update Shellcheck
-        run: |
-          sudo apt install xz-utils
-          scversion="stable"
-          wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.linux.x86_64.tar.xz" | tar -xJv
-          sudo cp "shellcheck-${scversion}/shellcheck" /usr/bin/
-          shellcheck --version
-      - name: Shellcheck
-        run: shellcheck -x bin/* -P lib/
+      - uses: actions/checkout@v3
+      - uses: asdf-vm/actions/install@v2
+      - run: scripts/lint.bash
 
-  shfmt:
-    runs-on: macos-latest
-
+  actionlint:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install shfmt
-        run: brew install shfmt
-
-      - name: Run shfmt
-        run: shfmt -d -i 2 -ci .
+      - uses: actions/checkout@v3
+      - name: Check workflow files
+        uses: docker://rhysd/actionlint:1.6.23
+        with:
+          args: -color
