@@ -42,10 +42,9 @@ download_source() {
 }
 
 download_release() {
-	local version install_path download_path major_version os_distribution os_arch
+	local version download_path major_version os_distribution os_arch
 	version="$1"
-	install_path="$2"
-	download_path="$3"
+	download_path="$2"
 	major_version="${version:0:1}"
 
 	if [[ "${major_version}" == "1" ]]; then
