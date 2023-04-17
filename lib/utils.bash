@@ -77,7 +77,7 @@ download_release() {
 	release_file="${download_path}/${filename}"
 	curl "${CURL_OPTS[@]}" -o "${release_file}" -C - "${release_url}" || fail "Could not download ${release_url}"
 	if [[ "${release_file: -3}" == "zip" ]]; then
-		unzip "${release_file}" -d "${download_path}"
+		unzip -oq "${release_file}" -d "${download_path}"
 		rm "${release_file}"
 	fi
 }
@@ -115,7 +115,7 @@ install_release() {
 
 		local tool_cmd
 		tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
-		test -x "${install_path}/${tool_cmd}" || fail "Expected ${install_path}/aws to be executable."
+		test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
 		echo "asdf-${TOOL_NAME} ${version} installation was successful!"
 	) || (
 		rm -rf "${install_path}"
