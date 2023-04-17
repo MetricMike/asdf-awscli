@@ -64,9 +64,9 @@ download_release() {
 		elif [[ "${os_distribution}" == "Darwin" ]]; then
 			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
 			filename="AWSCLIV2.pkg"
-		elif [[ "${os_distribution}" == "Windows_NT" ]]; then
-			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.msi"
-			filename="AWSCLIV2.msi"
+		# elif [[ "${os_distribution}" == "Windows_NT" ]]; then
+		# 	release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.msi"
+		# 	filename="AWSCLIV2.msi"
 		else
 			fail "asdf-${TOOL_NAME} does not support OS distribution ${os_distribution}"
 		fi
@@ -128,7 +128,7 @@ install_v1_bundled_installer() {
 	download_path="$1"
 	install_path="$2"
 	# requires curl, unzip, and python 3.7+ https://docs.aws.amazon.com/cli/v1/userguide/cli-chap-install.html#cli-chap-install-python
-	"${download_path}"/awscli-bundle/install --install-dir "${install_path}" #--bin-location "${install_path}/bin"
+	"${download_path}"/awscli-bundle/install --install-dir "${install_path}"
 }
 
 install_v2_linux_bundled_installer() {
