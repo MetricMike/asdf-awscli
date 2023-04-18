@@ -150,7 +150,7 @@ install_v2_macos_bundled_installer() {
 	install_path="$2"
 
 	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
-	mv "${download_path}/unpacked-awscliv2" "${install_path}"
+	mv "${download_path}/tmp-awscliv2" "${install_path}"
 	mkdir "${install_path}/bin"
 	ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
 	ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
