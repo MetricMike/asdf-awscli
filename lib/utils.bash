@@ -140,33 +140,21 @@ install_v2_linux_bundled_installer() {
 	"${download_path}"/aws/install --install-dir "${install_path}" --bin-dir "${install_path}/bin"
 }
 
+# The official AWS CLI directions suggest using installer and a choices.xml
+# but I was unable to find a deterministic way to make that work
+# so copypasta
 install_v2_macos_bundled_installer() {
+	# requires curl, pkgutil
 	local download_path install_path
 	download_path="$1"
 	install_path="$2"
 
-	# requires curl
-	cat <<EOF >"${download_path}/choices.xml"
-  <?xml version="1.0" encoding="UTF-8"?>
-  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-  <plist version="1.0">
-    <array>
-      <dict>
-        <key>choiceAttribute</key>
-        <string>customLocation</string>
-        <key>attributeSetting</key>
-        <string>${install_path}</string>
-        <key>choiceIdentifier</key>
-        <string>default</string>
-      </dict>
-    </array>
-  </plist>
-EOF
-	installer -pkg "${download_path}/AWSCLIV2.pkg" -target CurrentUserHomeDirectory -applyChoiceChangesXML "${download_path}/choices.xml"
+	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
+	mv "${download_path}/unpacked-awscliv2" "${install_path}"
 	mkdir "${install_path}/bin"
 	ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
 	ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
-	rm -rf "${download_path}/choices.xml"
+	rm -rf "${download_path}/tmp-awscliv2"
 }
 
 install_v2_windows_bundled_installer() {
