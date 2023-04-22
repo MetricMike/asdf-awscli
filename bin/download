@@ -10,5 +10,8 @@ source "${plugin_dir}/lib/utils.bash"
 
 mkdir -p "${ASDF_DOWNLOAD_PATH}"
 
-# Download compressed file to the download directory
-download_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}"
+if [ "${ASDF_INSTALL_TYPE}" = "version" ]; then
+	download_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}"
+elif [ "${ASDF_INSTALL_TYPE}" = "ref" ]; then
+	download_source "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}"
+fi

@@ -8,10 +8,6 @@ plugin_dir=$(dirname "$(dirname "${current_script_path}")")
 # shellcheck source=../lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-if [ "${ASDF_INSTALL_TYPE}" != "version" ]; then
-	fail "asdf-awscli supports version installs only"
-fi
-
 # Preserve compatibilty with older ASDF versions
 # https://github.com/asdf-vm/asdf/pull/669#issuecomment-600330467
 if [ -z "${ASDF_DOWNLOAD_PATH:-}" ]; then
@@ -24,4 +20,8 @@ if [ -z "${ASDF_DOWNLOAD_PATH:-}" ]; then
 	bash "$(dirname "$0")/download"
 fi
 
-install_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}" "${ASDF_INSTALL_PATH}"
+if [ "${ASDF_INSTALL_TYPE}" = "version" ]; then
+	install_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}" "${ASDF_INSTALL_PATH}"
+elif [ "${ASDF_INSTALL_TYPE}" = "ref" ]; then
+	install_source "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}" "${ASDF_INSTALL_PATH}" "${ASDF_CONCURRENCY}"
+fi
