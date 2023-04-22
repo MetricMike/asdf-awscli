@@ -28,7 +28,7 @@ list_all_versions() {
 }
 
 download_source() {
-	local version download_path major_version os_distribution os_arch
+	local version download_path major_version os_distribution
 	version="$1"
 	download_path="$2"
 	major_version="${version:0:1}"
@@ -38,7 +38,7 @@ download_source() {
 		filename="awscli.tar.gz"
 		source_file="${download_path}/${filename}"
 		curl "${CURL_OPTS[@]}" -o "${source_file}" -C - "${source_url}" || fail "Could not download ${source_url}"
-		tar -xzf "${source_file}" -C "${download_path}" || fail "Could not extract ${source_file}"
+		tar -xzf "${source_file}" -C "${download_path}" --strip-components=1 || fail "Could not extract ${source_file}"
 		rm "${source_file}"
 	else
 		fail "asdf-${TOOL_NAME} does not support downloading from source for major version v${major_version}"
@@ -188,7 +188,7 @@ install_v2_macos_bundled_installer() {
 
 	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
 	mv "${download_path}/tmp-awscliv2" "${install_path}"
-	mkdir "${install_path}/bin"
+	mkdir -p "${install_path}/bin"
 	ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
 	ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
 	rm -rf "${download_path}/tmp-awscliv2"
