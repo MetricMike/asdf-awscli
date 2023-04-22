@@ -181,16 +181,15 @@ install_v2_linux_bundled_installer() {
 # but I was unable to find a deterministic way to make that work
 # so copypasta
 install_v2_macos_bundled_installer() {
-	# requires curl, pkgutil
 	local download_path install_path
 	download_path="$1"
 	install_path="$2"
 
 	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
-	mv "${download_path}/tmp-awscliv2" "${install_path}"
+	mv "${download_path}/tmp-awscliv2/aws-cli.pkg/Payload/aws-cli" "${install_path}"
 	mkdir -p "${install_path}/bin"
-	ln -s "${install_path}/aws-cli/aws" "${install_path}/bin/aws"
-	ln -s "${install_path}/aws-cli/aws_completer" "${install_path}/bin/aws_completer"
+	ln -snf "${install_path}/aws" "${install_path}/bin/aws"
+	ln -snf "${install_path}/aws_completer" "${install_path}/bin/aws_completer"
 	rm -rf "${download_path}/tmp-awscliv2"
 }
 
