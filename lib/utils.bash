@@ -184,6 +184,7 @@ install_v2_macos_bundled_installer() {
 	local download_path install_path
 	download_path="$1"
 	install_path="$2"
+	# requires rosetta on M1 macs
 
 	mkdir -p "${install_path}/bin"
 	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
