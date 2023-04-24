@@ -8,7 +8,8 @@ plugin_dir=$(dirname "$(dirname "${current_script_path}")")
 # shellcheck source=../lib/utils.bash
 . "${plugin_dir}/lib/utils.bash"
 
-GIT_REMINDER_FILE="${ASDF_INSTALL_PATH}/.upgradegit"
+GIT_REMINDER_FILE="$(mktemp -t asdf_asdf-awscli_upgradegit_XXXXXX)"
+GIT_REMINDER_FILE_FUZZY="${GIT_REMINDER_FILE%_*}"
 GH_REPO="https://github.com/aws/aws-cli"
 GIT_VERSION=$(git --version)
 GIT_VERSION="${GIT_VERSION##* }"
@@ -22,9 +23,9 @@ if [ "$(git_supports_sort "${GIT_VERSION}")" -eq 0 ]; then
 	GIT_SUPPORTS_SORT=0
 else
 	GIT_SUPPORTS_SORT=1
-	if [ ! -f "${GIT_REMINDER_FILE}" ]; then
+	if [ ! -f "${GIT_REMINDER_FILE_FUZZY}" ]; then
 		printf "consider upgrading git to a version >= 2.18.0 for faster asdf - you have v%s\n" "${GIT_VERSION}"
-		touch "${GIT_REMINDER_FILE}"
+		touch "${GIT_REMINDER_FILE_FUZZY}"
 	fi
 fi
 
