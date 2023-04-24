@@ -6,9 +6,71 @@ current_script_path=${BASH_SOURCE[0]}
 plugin_dir=$(dirname "$(dirname "${current_script_path}")")
 
 # shellcheck source=../lib/utils.bash
-source "${plugin_dir}/lib/utils.bash"
+. "${plugin_dir}/lib/utils.bash"
+
+TOOL_NAME="awscli"
+CURL_OPTS=(-fsSL)
 
 mkdir -p "${ASDF_DOWNLOAD_PATH}"
+
+download_source() {
+	local version download_path major_version os_distribution
+	version="$1"
+	download_path="$2"
+	major_version="${version:0:1}"
+
+	if [[ "${major_version}" = "2" ]]; then
+		source_url="https://awscli.amazonaws.com/awscli-${version}.tar.gz"
+		filename="awscli.tar.gz"
+		source_file="${download_path}/${filename}"
+		curl "${CURL_OPTS[@]}" -o "${source_file}" -C - "${source_url}" || fail "Could not download ${source_url}"
+		tar -xzf "${source_file}" -C "${download_path}" --strip-components=1 || fail "Could not extract ${source_file}"
+		rm "${source_file}"
+	else
+		fail "asdf-${TOOL_NAME} does not support downloading from source for major version v${major_version}"
+	fi
+}
+
+download_release() {
+	local version download_path major_version os_distribution os_arch
+	version="$1"
+	download_path="$2"
+	major_version="${version:0:1}"
+
+	if [[ "${major_version}" = "1" ]]; then
+		release_url="https://s3.amazonaws.com/aws-cli/awscli-bundle-${version}.zip"
+		filename="awscli-bundle.zip"
+	elif [[ "${major_version}" = "2" ]]; then
+		os_distribution="$(uname -s)"
+		os_arch="$(uname -m)"
+
+		if [[ "${os_distribution}" = "Linux" ]]; then
+			if [[ "${os_arch}" = "x86_64" || "${os_arch}" = "aarch64" ]]; then
+				release_url="https://awscli.amazonaws.com/awscli-exe-linux-${os_arch}-${version}.zip"
+				filename="awscliv2.zip"
+			else
+				fail "asdf-${TOOL_NAME} does not support ${os_arch} on ${os_distribution}"
+			fi
+		elif [[ "${os_distribution}" = "Darwin" ]]; then
+			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
+			filename="AWSCLIV2.pkg"
+		# elif [[ "${os_distribution}" = "Windows_NT" ]]; then
+		# 	release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.msi"
+		# 	filename="AWSCLIV2.msi"
+		else
+			fail "asdf-${TOOL_NAME} does not support OS distribution ${os_distribution}"
+		fi
+	else
+		fail "asdf-${TOOL_NAME} does not support major version v${version}"
+	fi
+
+	release_file="${download_path}/${filename}"
+	curl "${CURL_OPTS[@]}" -o "${release_file}" "${release_url}" || fail "Could not download ${release_url}"
+	if [[ "${release_file: -3}" = "zip" ]]; then
+		unzip -oq "${release_file}" -d "${download_path}"
+		rm "${release_file}"
+	fi
+}
 
 if [ "${ASDF_INSTALL_TYPE}" = "version" ]; then
 	download_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}"
