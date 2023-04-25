@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
@@ -83,10 +83,10 @@ jobs:
       - name: Retrieve latest version
         run: |
           echo "cli-version=ref:$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
-  
+
       - name: asdf_plugin_test
-            uses: asdf-vm/actions/plugin-test@v2
-            with:
-              skip_install: true
-              command: aws --version
-              version: ${{ env.cli-version }}
+        uses: asdf-vm/actions/plugin-test@v2
+        with:
+          skip_install: true
+          command: aws --version
+          version: ${{ env.cli-version }}
