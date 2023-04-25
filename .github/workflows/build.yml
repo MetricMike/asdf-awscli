@@ -39,6 +39,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Cache asdf
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
@@ -59,21 +68,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache asdf
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.asdf
+          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
+          restore-keys: |
+            ${{ runner.os }}-asdf-
+
       - name: Install asdf and asdf-awscli
         uses: asdf-vm/actions/plugins-add@v2
         with:
           tool_versions: |
             # tools won't be installed by this action, only plugins
             awscli
-
-      - name: Cache asdf
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ '**/.tool-versions' }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
 
       - name: Retrieve latest version
         run: |
