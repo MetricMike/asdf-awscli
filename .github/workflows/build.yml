@@ -29,12 +29,14 @@ jobs:
         cli-version: 
           - "latest:1"
           - "latest:2"
+          - "ref:$(asdf latest awscli 2)"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
