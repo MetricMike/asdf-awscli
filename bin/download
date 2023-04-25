@@ -14,7 +14,7 @@ CURL_OPTS=(-fsSL)
 mkdir -p "${ASDF_DOWNLOAD_PATH}"
 
 download_source() {
-	local version download_path major_version os_distribution
+	local version download_path major_version
 	version="$1"
 	download_path="$2"
 	major_version="${version:0:1}"
@@ -32,7 +32,7 @@ download_source() {
 }
 
 download_release() {
-	local version download_path major_version os_distribution os_arch
+	local version download_path major_version
 	version="$1"
 	download_path="$2"
 	major_version="${version:0:1}"
@@ -41,24 +41,21 @@ download_release() {
 		release_url="https://s3.amazonaws.com/aws-cli/awscli-bundle-${version}.zip"
 		filename="awscli-bundle.zip"
 	elif [[ "${major_version}" = "2" ]]; then
-		os_distribution="$(uname -s)"
-		os_arch="$(uname -m)"
-
-		if [[ "${os_distribution}" = "Linux" ]]; then
-			if [[ "${os_arch}" = "x86_64" || "${os_arch}" = "aarch64" ]]; then
-				release_url="https://awscli.amazonaws.com/awscli-exe-linux-${os_arch}-${version}.zip"
+		if [[ "${OS_NAME}" = "Linux" ]]; then
+			if [[ "${OS_ARCH}" = "x86_64" || "${OS_ARCH}" = "aarch64" ]]; then
+				release_url="https://awscli.amazonaws.com/awscli-exe-linux-${OS_ARCH}-${version}.zip"
 				filename="awscliv2.zip"
 			else
-				fail "asdf-${TOOL_NAME} does not support ${os_arch} on ${os_distribution}"
+				fail "asdf-${TOOL_NAME} does not support ${OS_ARCH} on ${OS_NAME}"
 			fi
-		elif [[ "${os_distribution}" = "Darwin" ]]; then
+		elif [[ "${OS_NAME}" = "Darwin" ]]; then
 			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.pkg"
 			filename="AWSCLIV2.pkg"
-		# elif [[ "${os_distribution}" = "Windows_NT" ]]; then
-		# 	release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.msi"
-		# 	filename="AWSCLIV2.msi"
+		elif [[ "${OS_NAME}" = "Windows_NT" ]]; then
+			release_url="https://awscli.amazonaws.com/AWSCLIV2-${version}.msi"
+			filename="AWSCLIV2.msi"
 		else
-			fail "asdf-${TOOL_NAME} does not support OS distribution ${os_distribution}"
+			fail "asdf-${TOOL_NAME} does not support OS distribution ${OS_NAME}"
 		fi
 	else
 		fail "asdf-${TOOL_NAME} does not support major version v${version}"

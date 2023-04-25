@@ -35,12 +35,6 @@ sort_versions() {
     LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
-list_github_tags() {
-  git ls-remote --tags --refs "${GH_REPO}" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//'
-}
-
 list_remote_tags() {
   if [ "${GIT_SUPPORTS_SORT}" -eq 0 ]; then
     git -c 'versionsort.suffix=a' -c 'versionsort.suffix=b' \
