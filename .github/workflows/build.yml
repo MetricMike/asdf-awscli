@@ -39,6 +39,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install asdf
+        uses: asdf-vm/actions/setup@v2
+
       - name: Cache asdf
         uses: actions/cache@v3
         with:
@@ -51,6 +54,7 @@ jobs:
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
+          skip_install: true
           command: aws --version
           version: ${{ matrix.cli-version }}
 
@@ -68,6 +72,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install asdf
+        uses: asdf-vm/actions/setup@v2
+
       - name: Cache asdf
         uses: actions/cache@v3
         with:
@@ -77,7 +84,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-asdf-
 
-      - name: Install asdf and asdf-awscli
+      - name: Install asdf-awscli
         uses: asdf-vm/actions/plugins-add@v2
         with:
           tool_versions: |
