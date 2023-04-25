@@ -13,7 +13,7 @@ on:
     - cron: "0 0 * * 0" # weekly at midnight on sundays (ish)
 
 env:
-  ASDF_CONCURRENCY: 1
+  ASDF_CONCURRENCY: 2
 
 jobs:
   build_from_installers:
@@ -26,8 +26,6 @@ jobs:
           # - windows-latest In theory this should work, but ASDF requires bash and
         python-version:
           - "3.8"
-          - "3.9"
-          - "3.10"
           - "3.11"
         cli-version:
           - "latest:1"
@@ -39,22 +37,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install asdf
-        uses: asdf-vm/actions/setup@v2
-
-      - name: Cache asdf
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
-
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
-          skip_install: true
           command: aws --version
           version: ${{ matrix.cli-version }}
 
@@ -65,24 +50,15 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+        python-version:
+          - "3.8"
+          - "3.11"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
-
-      - name: Install asdf
-        uses: asdf-vm/actions/setup@v2
-
-      - name: Cache asdf
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.asdf
-          key: ${{ runner.os }}-asdf-${{ hashFiles('**/.tool-versions') }}
-          restore-keys: |
-            ${{ runner.os }}-asdf-
+          python-version: ${{ matrix.python-version }}
 
       - name: Install asdf-awscli
         uses: asdf-vm/actions/plugins-add@v2
