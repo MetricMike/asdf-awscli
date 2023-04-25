@@ -2,7 +2,142 @@
 
 set -euo pipefail
 
-# shellcheck source=../lib/utils.bash
-source "$(dirname "$0")/../lib/utils.bash"
+current_script_path=${BASH_SOURCE[0]}
+plugin_dir=$(dirname "$(dirname "${current_script_path}")")
 
-install_version "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"
+# shellcheck source=../lib/utils.bash
+. "${plugin_dir}/lib/utils.bash"
+
+TOOL_NAME="awscli"
+TOOL_TEST="aws --version"
+
+install_source() {
+	local version download_path install_path major_version make_concurrency tool_cmd
+	version="$1"
+	download_path="$2"
+	install_path="$3"
+	make_concurrency="$4"
+	major_version="${version:0:1}"
+	tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
+
+	(
+		if [[ "${major_version}" = "2" ]]; then
+			if [[ "${OS_NAME}" = "Linux" || "${OS_NAME}" = "Darwin" ]]; then
+				pushd "${download_path}"
+				./configure --prefix="${install_path}" --with-download-deps --with-install-type=portable-exe
+				make --jobs "${make_concurrency}"
+				make install
+				popd
+			else
+				fail "asdf-${TOOL_NAME} does not support installing from source for OS distribution ${OS_NAME}"
+			fi
+		else
+			fail "asdf-${TOOL_NAME} does not support installing from source for major version v${major_version}"
+		fi
+
+		test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
+		echo "asdf-${TOOL_NAME} ${version} installation was successful!"
+	) || (
+		rm -rf "${install_path}"
+		fail "An error ocurred while installing awscli ${version}."
+	)
+}
+
+install_release() {
+	local version download_path install_path major_version
+	version="$1"
+	download_path="$2"
+	install_path="$3"
+	major_version="${version:0:1}"
+
+	(
+		if [[ "${major_version}" = "1" ]]; then
+			install_v1_bundled_installer "${download_path}" "${install_path}"
+		elif [[ "${major_version}" = "2" ]]; then
+			if [[ "${OS_NAME}" = "Linux" ]]; then
+				if [[ "${OS_ARCH}" = "x86_64" || "${OS_ARCH}" = "aarch64" ]]; then
+					install_v2_linux_bundled_installer "${download_path}" "${install_path}"
+				else
+					fail "asdf-${TOOL_NAME} does not support ${OS_ARCH} on ${OS_NAME}"
+				fi
+			elif [[ "${OS_NAME}" = "Darwin" ]]; then
+				install_v2_macos_bundled_installer "${download_path}" "${install_path}"
+			elif [[ "${OS_NAME}" = "Windows_NT" ]]; then
+				install_v2_windows_bundled_installer "${download_path}" "${install_path}"
+			else
+				fail "asdf-${TOOL_NAME} does not support OS distribution ${OS_NAME}"
+			fi
+		else
+			fail "asdf-${TOOL_NAME} does not support major version v${major_version}"
+		fi
+
+		local tool_cmd
+		tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
+		test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
+		echo "asdf-${TOOL_NAME} ${version} installation was successful!"
+	) || (
+		rm -rf "${install_path}"
+		fail "An error ocurred while installing awscli ${version}."
+	)
+}
+
+install_v1_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
+	# requires python 3.8+ https://aws.amazon.com/blogs/developer/python-support-policy-updates-for-aws-sdks-and-tools/
+	"${download_path}"/awscli-bundle/install --install-dir "${install_path}"
+}
+
+install_v2_linux_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
+	# requires glibc, groff, less
+	rm -rf "{$install_path}"
+	"${download_path}"/aws/install --install-dir "${install_path}" --bin-dir "${install_path}/bin"
+}
+
+# The official AWS CLI directions suggest using installer and a choices.xml
+# but I was unable to find a deterministic way to make that work
+# so copypasta
+install_v2_macos_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
+	# requires rosetta on M1 macs
+
+	mkdir -p "${install_path}/bin"
+	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
+	cp -a "${download_path}/tmp-awscliv2/aws-cli.pkg/Payload/aws-cli/" "${install_path}"
+	ln -snf "${install_path}/aws" "${install_path}/bin/aws"
+	ln -snf "${install_path}/aws_completer" "${install_path}/bin/aws_completer"
+	rm -rf "${download_path}/tmp-awscliv2"
+}
+
+install_v2_windows_bundled_installer() {
+	local download_path install_path
+	download_path="$1"
+	install_path="$2"
+
+	# requires curl, msiexec
+	msiexec.exe /i "${download_path}/AWSCLIV2.msi" "INSTALLDIR=${ASDF_INSTALL_PATH}" MSIINSTALLPERUSER=1
+}
+
+# Preserve compatibilty with older ASDF versions
+# https://github.com/asdf-vm/asdf/pull/669#issuecomment-600330467
+if [ -z "${ASDF_DOWNLOAD_PATH:-}" ]; then
+	tmp_download_dir=$(mktemp -d -t asdf_asdf-awscli_XXXXXX)
+	trap 'rm -rf "${tmp_download_dir}"' EXIT
+	printf "run download script for older versions of asdf\\n"
+	export ASDF_DOWNLOAD_PATH="${tmp_download_dir}"
+
+	# download
+	bash "$(dirname "$0")/download"
+fi
+
+if [ "${ASDF_INSTALL_TYPE}" = "version" ]; then
+	install_release "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}" "${ASDF_INSTALL_PATH}"
+elif [ "${ASDF_INSTALL_TYPE}" = "ref" ]; then
+	install_source "${ASDF_INSTALL_VERSION}" "${ASDF_DOWNLOAD_PATH}" "${ASDF_INSTALL_PATH}" "${ASDF_CONCURRENCY}"
+fi
