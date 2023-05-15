@@ -9,16 +9,15 @@ plugin_dir=$(dirname "$(dirname "${current_script_path}")")
 . "${plugin_dir}/lib/utils.bash"
 
 TOOL_NAME="awscli"
-TOOL_TEST="aws --version"
+TOOL_CMD="aws"
 
 install_source() {
-	local version download_path install_path major_version make_concurrency tool_cmd
+	local version download_path install_path major_version make_concurrency
 	version="$1"
 	download_path="$2"
 	install_path="$3"
 	make_concurrency="$4"
 	major_version="${version:0:1}"
-	tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
 
 	(
 		if [[ "${major_version}" = "2" ]]; then
@@ -35,8 +34,8 @@ install_source() {
 			fail "asdf-${TOOL_NAME} does not support installing from source for major version v${major_version}"
 		fi
 
-		test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
-		echo "asdf-${TOOL_NAME} ${version} installation was successful!"
+		test -x "${install_path}/bin/${TOOL_CMD}" || fail "Expected ${install_path}/bin/${TOOL_CMD} to be executable."
+		printfn "asdf-${TOOL_NAME} ${version} installation was successful!"
 	) || (
 		rm -rf "${install_path}"
 		fail "An error ocurred while installing awscli ${version}."
@@ -71,10 +70,8 @@ install_release() {
 			fail "asdf-${TOOL_NAME} does not support major version v${major_version}"
 		fi
 
-		local tool_cmd
-		tool_cmd="$(echo "${TOOL_TEST}" | cut -d' ' -f1)"
-		test -x "${install_path}/bin/${tool_cmd}" || fail "Expected ${install_path}/bin/${tool_cmd} to be executable."
-		echo "asdf-${TOOL_NAME} ${version} installation was successful!"
+		test -x "${install_path}/bin/${TOOL_CMD}" || fail "Expected ${install_path}/bin/${TOOL_CMD} to be executable."
+		printfn "asdf-${TOOL_NAME} ${version} installation was successful!"
 	) || (
 		rm -rf "${install_path}"
 		fail "An error ocurred while installing awscli ${version}."
@@ -129,7 +126,7 @@ install_v2_windows_bundled_installer() {
 if [ -z "${ASDF_DOWNLOAD_PATH:-}" ]; then
 	tmp_download_dir=$(mktemp -d -t asdf_asdf-awscli_XXXXXX)
 	trap 'rm -rf "${tmp_download_dir}"' EXIT
-	printf "run download script for older versions of asdf\\n"
+	printfn "run download script for older versions of asdf"
 	export ASDF_DOWNLOAD_PATH="${tmp_download_dir}"
 
 	# download

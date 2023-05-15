@@ -4,10 +4,14 @@
 set -euo pipefail
 
 fail() {
-	echo -e "asdf-awscli: $*"
+	printfn "$*"
 	exit 1
 }
 
-IFS=" " read -r -a OS_INFO <<<"$(uname -sm)"
-OS_NAME="${OS_INFO[0]}"
-OS_ARCH="${OS_INFO[1]}"
+printfn() {
+	printf "asdf-awscli: %s\\n" "$*"
+}
+
+OS_INFO="$(uname -sm)"
+OS_NAME="${OS_INFO% *}"
+OS_ARCH="${OS_INFO#* }"
