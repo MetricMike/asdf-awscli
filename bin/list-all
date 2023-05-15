@@ -8,23 +8,23 @@ plugin_dir=$(dirname "$(dirname "${current_script_path}")")
 # shellcheck source=../lib/utils.bash
 . "${plugin_dir}/lib/utils.bash"
 
-GIT_REMINDER_FILE="$(mktemp -t asdf_asdf-awscli_upgradegit_XXXXXX)"
-GIT_REMINDER_FILE_FUZZY="${GIT_REMINDER_FILE%_*}"
 GH_REPO="https://github.com/aws/aws-cli"
-GIT_VERSION=$(git --version)
-GIT_VERSION="${GIT_VERSION##* }"
+# shellcheck disable=2207
+GIT_VERSION_STRING=($(git --version))
+# shellcheck disable=2206
+GIT_VERSION=(${GIT_VERSION_STRING[2]//./ })
+GIT_MAJOR_VERSION="${GIT_VERSION[0]}"
+GIT_MINOR_VERSION="${GIT_VERSION[1]}"
 
-git_supports_sort() {
-	awk '{ split($0,a,"."); if ((a[1] < 2) || (a[2] < 18)) { print "1" } else { print "0" } }' <<<"$1"
-}
-
-if [ "$(git_supports_sort "${GIT_VERSION}")" -eq 0 ]; then
-	rm -f "${GIT_REMINDER_FILE}"
+# need git 2.18.0+ for version sorting
+if [ "${GIT_MAJOR_VERSION}" -ge 2 ] && [ "${GIT_MINOR_VERSION}" -ge 18 ]; then
 	GIT_SUPPORTS_SORT=0
 else
 	GIT_SUPPORTS_SORT=1
+	GIT_REMINDER_FILE="$(mktemp -t asdf_asdf-awscli_upgradegit_XXXXXX)"
+	GIT_REMINDER_FILE_FUZZY="${GIT_REMINDER_FILE%_*}"
 	if [ ! -f "${GIT_REMINDER_FILE_FUZZY}" ]; then
-		printf "consider upgrading git to a version >= 2.18.0 for faster asdf - you have v%s\n" "${GIT_VERSION}"
+		printfn "consider upgrading git to a version >= 2.18.0 for faster asdf - you have v${GIT_VERSION_STRING[2]}"
 		touch "${GIT_REMINDER_FILE_FUZZY}"
 	fi
 fi
@@ -41,7 +41,7 @@ list_remote_tags() {
 			-c 'versionsort.suffix=r' -c 'versionsort.suffix=p' \
 			-c 'versionsort.suffix=-' -c 'versionsort.suffix=_' \
 			ls-remote --exit-code --tags --refs --sort="version:refname" "${GH_REPO}" |
-			awk -F'[/v]' '$NF ~ /^[0-9]+.*/ { print $NF }' || fail "no releases found"
+			awk -F'[/v]' '$NF ~ /^[0-9]+.*/ { printf "%s%s", (NR==1 ? "" : " "), $NF } END { print "" }' || fail "no releases found"
 	else
 		git ls-remote --exit-code --tags --refs "${GH_REPO}" |
 			awk -F'[/v]' '$NF ~ /^[0-9]+.*/ { print $NF }' || fail "no releases found"
@@ -56,4 +56,4 @@ list_all_versions() {
 	fi
 }
 
-list_all_versions | xargs echo
+list_all_versions
