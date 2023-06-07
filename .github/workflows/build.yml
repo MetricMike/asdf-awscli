@@ -61,7 +61,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       
       - name: Try with GNU coreutils on macos
-        if: ${{ matrix.os == macos-latest }}
+        if: ${{ matrix.os == 'macos-latest' }}
         run: |
           brew update
           brew install coreutils
