@@ -59,6 +59,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      
+      - name: Try with GNU coreutils on macos
+        if: ${{ matrix.os == macos-latest }}
+        run: |
+          brew update
+          brew install coreutils
 
       - name: Install asdf-awscli
         uses: asdf-vm/actions/plugins-add@v2
