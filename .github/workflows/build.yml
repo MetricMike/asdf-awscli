@@ -56,6 +56,10 @@ jobs:
         run: |
           which cp
           cp --version
+          python --version
+          ${pythonLocation}/bin/python --version
+          echo ${GITHUB_PATH}
+          echo ${PATH}
 
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
