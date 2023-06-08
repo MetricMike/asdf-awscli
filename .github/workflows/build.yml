@@ -49,7 +49,7 @@ jobs:
         run: |
           brew update
           brew install coreutils
-          echo "${HOMEBREW_PREFIX}/opt/coreutils/libexec/gnubin" >> "${GITHUB_PATH}"
+          echo "$(brew --prefix)/opt/coreutils/libexec/gnubin" >> "${GITHUB_PATH}"
       
       - name: Check cp version if using latest
         if: matrix.coreutils == 'latest'
