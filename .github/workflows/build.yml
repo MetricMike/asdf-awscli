@@ -65,6 +65,11 @@ jobs:
         run: |
           brew update
           brew install coreutils
+          echo "/usr/local/opt/coreutils/libexec/gnubin" >> $GITHUB_PATH
+      
+      - name: Check cp version on macos
+        if: matrix.os == 'macos-latest'
+        run: |
           which cp
           cp --version
 
