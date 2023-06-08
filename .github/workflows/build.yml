@@ -42,6 +42,33 @@ jobs:
         with:
           command: aws --version
           version: ${{ matrix.cli-version }}
+      
+      - name: Try with GNU coreutils on macos
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install coreutils
+          echo "/usr/local/opt/coreutils/libexec/gnubin" >> "${GITHUB_PATH}"
+      
+      - name: Check cp version on macos
+        if: matrix.os == 'macos-latest'
+        run: |
+          which cp
+          cp --version
+
+      - name: Install asdf-awscli
+        uses: asdf-vm/actions/plugins-add@v2
+        with:
+          tool_versions: |
+            # tools won't be installed by this action, only plugins
+            awscli
+
+      - name: asdf_plugin_test
+        uses: asdf-vm/actions/plugin-test@v2
+        with:
+          skip_install: true
+          command: aws --version
+          version: ${{ env.cli-version }}
 
   build_from_source:
     name: asdf-awscli plugin test using source
@@ -65,7 +92,7 @@ jobs:
         run: |
           brew update
           brew install coreutils
-          echo "/usr/local/opt/coreutils/libexec/gnubin" >> $GITHUB_PATH
+          echo "/usr/local/opt/coreutils/libexec/gnubin" >> "${GITHUB_PATH}"
       
       - name: Check cp version on macos
         if: matrix.os == 'macos-latest'
