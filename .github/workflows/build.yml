@@ -51,11 +51,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - name: Check cp version if using latest
+      - name: Check mv version if using latest
         if: matrix.coreutils == 'latest'
         run: |
-          which cp
-          cp --version
+          which mv
+          mv --version
           which python
           python --version
           ${pythonLocation}/bin/python --version
