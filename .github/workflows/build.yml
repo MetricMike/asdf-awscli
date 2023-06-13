@@ -30,12 +30,37 @@ jobs:
         cli-version:
           - "latest:1"
           - "latest:2"
+        coreutils:
+          - default
+          - latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Setup homebrew if using latest coreutils
+        if: matrix.coreutils == 'latest'
+        uses: Homebrew/actions/setup-homebrew@master
+        
+      - name: Try installing latest GNU coreutils
+        if: matrix.coreutils == 'latest'
+        run: |
+          brew update
+          brew install coreutils
+          echo "$(brew --prefix)/opt/coreutils/libexec/gnubin" >> "${GITHUB_PATH}"
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+      
+      - name: Check paths and coreutils version if using latest
+        if: matrix.coreutils == 'latest'
+        run: |
+          which cp
+          cp --version
+          which python
+          python --version
+          "${pythonLocation}/bin/python" --version
+          echo "${GITHUB_PATH}"
+          echo "${PATH}"
 
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
