@@ -58,7 +58,7 @@ jobs:
           cp --version
           which python
           python --version
-          ${pythonLocation}/bin/python --version
+          "${pythonLocation}/bin/python" --version
           echo "${GITHUB_PATH}"
           echo "${PATH}"
 
