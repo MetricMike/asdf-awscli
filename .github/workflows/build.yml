@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         os:
-          # - ubuntu-latest
+          - ubuntu-latest
           - macos-latest
           # - windows-latest In theory this should work, but ASDF requires bash and
         python-version:
@@ -51,11 +51,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - name: Check mv version if using latest
+      - name: Check paths and coreutils version if using latest
         if: matrix.coreutils == 'latest'
         run: |
-          which mv
-          mv --version
+          which cp
+          cp --version
           which python
           python --version
           ${pythonLocation}/bin/python --version

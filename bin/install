@@ -105,13 +105,10 @@ install_v2_macos_bundled_installer() {
 	# requires rosetta on M1 macs
 
 	pkgutil --expand-full "${download_path}/AWSCLIV2.pkg" "${download_path}/tmp-awscliv2"
-	ls -halt "${download_path}/tmp-awscliv2/aws-cli.pkg/Payload/aws-cli/"
-	cp -vLR "${download_path}/tmp-awscliv2/aws-cli.pkg/Payload/aws-cli/"* "${install_path}"
+	cp -LR "${download_path}/tmp-awscliv2/aws-cli.pkg/Payload/aws-cli/"* "${install_path}"
 	mkdir -p "${install_path}/bin"
 	ln -snf "${install_path}/aws" "${install_path}/bin/aws"
 	ln -snf "${install_path}/aws_completer" "${install_path}/bin/aws_completer"
-	ls -halt "${install_path}"
-	ls -halt "${install_path}/bin"
 	rm -rf "${download_path}/tmp-awscliv2"
 }
 
