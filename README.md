@@ -31,7 +31,7 @@ Plugin:
 ```shell
 asdf plugin add awscli
 # or
-asdf plugin add https://github.com/MetricMike/asdf-awscli.git
+asdf plugin-add awscli https://github.com/MetricMike/asdf-awscli.git
 ```
 
 awscli:
