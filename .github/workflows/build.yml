@@ -63,7 +63,7 @@ jobs:
           echo "${PATH}"
 
       - name: asdf_plugin_test
-        uses: asdf-vm/actions/plugin-test@v2
+        uses: asdf-vm/actions/plugin-test@v3
         with:
           command: aws --version
           version: ${{ matrix.cli-version }}
@@ -86,7 +86,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install asdf-awscli
-        uses: asdf-vm/actions/plugins-add@v2
+        uses: asdf-vm/actions/plugins-add@v3
         with:
           tool_versions: |
             # tools won't be installed by this action, only plugins
@@ -97,7 +97,7 @@ jobs:
           echo "cli-version=ref:$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
 
       - name: asdf_plugin_test
-        uses: asdf-vm/actions/plugin-test@v2
+        uses: asdf-vm/actions/plugin-test@v3
         with:
           skip_install: true
           command: aws --version
