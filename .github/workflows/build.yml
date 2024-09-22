@@ -16,23 +16,25 @@ env:
   ASDF_CONCURRENCY: 2
 
 jobs:
-  build_from_installers:
-    name: asdf-awscli plugin test using prebuilt installers
+  build:
     strategy:
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
-          # - windows-latest In theory this should work, but ASDF requires bash and
+          # - windows-latest In theory this should work, but ASDF requires bash and friends
         python-version:
           - "3.8"
           - "3.11"
         cli-version:
           - "latest:1"
           - "latest:2"
-        coreutils:
-          - default
-          - latest
+          - "source"
+        include:
+          - os: macos-latest
+            coreutils:
+              - default
+              - latest
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup homebrew if using latest coreutils
@@ -61,44 +63,26 @@ jobs:
           "${pythonLocation}/bin/python" --version
           echo "${GITHUB_PATH}"
           echo "${PATH}"
-
+      
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
           command: aws --version
           version: ${{ matrix.cli-version }}
 
-  build_from_source:
-    name: asdf-awscli plugin test using source
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-        python-version:
-          - "3.8"
-          - "3.11"
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install asdf-awscli
-        uses: asdf-vm/actions/plugins-add@v2
-        with:
-          tool_versions: |
-            # tools won't be installed by this action, only plugins
-            awscli
-
-      - name: Retrieve latest version
+      - name: Retrieve latest version (source)
+        if: matrix.cli-version == 'source'
         run: |
-          echo "cli-version=ref:$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
+          echo "AWSCLI_VERSION=ref:$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
+
+      - name: Retrieve latest version (binary)
+        if: matrix.cli-version != 'source'
+        run: |
+          echo "AWSCLI_VERSION=$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
 
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
         with:
-          skip_install: true
           command: aws --version
-          version: ${{ env.cli-version }}
+
+          version: ${{ env.AWSCLI_VERSION || '' }}
