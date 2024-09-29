@@ -68,12 +68,12 @@ jobs:
       - name: Retrieve latest version (source)
         if: matrix.cli-version == 'source'
         run: |
-          echo "AWSCLI_VERSION=ref:$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
+          echo "AWSCLI_VERSION=ref:$(asdf latest awscli 2)" >> $GITHUB_ENV
 
       - name: Retrieve latest version (binary)
         if: matrix.cli-version != 'source'
         run: |
-          echo "AWSCLI_VERSION=$(asdf latest awscli 2)" >> "${GITHUB_ENV}"
+          echo "AWSCLI_VERSION=$(asdf latest awscli 2)" >> $GITHUB_ENV
 
       - name: asdf_plugin_test
         uses: asdf-vm/actions/plugin-test@v2
