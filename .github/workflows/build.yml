@@ -65,6 +65,9 @@ jobs:
           echo "${GITHUB_PATH}"
           echo "${PATH}"
 
+      - name: Install asdf
+        uses: asdf-vm/actions/install@v3
+
       - name: Retrieve latest version (source)
         if: matrix.cli-version == 'source'
         run: |
