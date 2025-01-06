@@ -67,6 +67,8 @@ jobs:
 
       - name: Install asdf
         uses: asdf-vm/actions/install@v3
+        continue-on-error: true
+        # https://github.com/asdf-vm/actions/issues/562
 
       - name: Retrieve latest version (source)
         if: matrix.cli-version == 'source'
