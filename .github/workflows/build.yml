@@ -50,7 +50,7 @@ jobs:
           echo "$(brew --prefix)/opt/coreutils/libexec/gnubin" >> "${GITHUB_PATH}"
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -79,7 +79,7 @@ jobs:
           echo "AWSCLI_VERSION=$(asdf latest awscli 2)" >> $GITHUB_ENV
 
       - name: asdf_plugin_test
-        uses: asdf-vm/actions/plugin-test@v2
+        uses: asdf-vm/actions/plugin-test@v3
         with:
           command: aws --version
 
