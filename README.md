@@ -54,7 +54,7 @@ asdf install awscli ref:2.11.15
 asdf install awscli "ref:$(asdf latest awscli 2)" # 2.11.15
 
 # Set a version globally (on your ~/.tool-versions file)
-asdf global awscli latest
+(cd; asdf set awscli latest)
 
 # Now awscli commands are available
 aws --version
