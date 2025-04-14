@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/MetricMike/asdf-awscli/compare/v1.0.1...v1.0.2) (2025-04-14)
+
+
+### Bug Fixes
+
+* update to not mention deprecated global command ([d05f412](https://github.com/MetricMike/asdf-awscli/commit/d05f41207e2127f6062156a5de470e2ee169b9b3))
+
 ## [1.0.1](https://github.com/MetricMike/asdf-awscli/compare/v1.0.0...v1.0.1) (2023-06-13)
 
 
